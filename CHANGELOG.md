@@ -1,8 +1,4 @@
-## 1.0.0
+## 1.0.1
 
-- Phiên bản đầu tiên
-- Hỗ trợ API v2 (provinces.open-api.vn)
-- CRUD cho Province, Ward
-- Tìm kiếm theo tên
-- Xử lý lỗi đầy đủ với typed exceptions
-- Test coverage với mockito
+- Cập nhật README.md phù hợp với phiên bản mới (bỏ district)
+- Thêm ví dụ về cách sử dụng (/example/lib/main.dart)
