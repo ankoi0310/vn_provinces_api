@@ -1,4 +1,9 @@
 include: package:flutter_lints/flutter.yaml
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+linter:
+  rules:
+    - prefer_const_constructors
+    - prefer_final_fields
+    - always_declare_return_types
+    - avoid_print
+    - require_trailing_commas
