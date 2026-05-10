@@ -19,17 +19,8 @@ Hỗ trợ **API v2** (sau sáp nhập).
 
 ## Cài đặt
 
-Thêm vào `pubspec.yaml`:
-
-```yaml
-dependencies:
-  vn_provinces_api: ^1.0.0
-```
-
-Sau đó chạy:
-
 ```bash
-flutter pub get
+dart pub add vn_provinces_api
 ```
 
 ---
