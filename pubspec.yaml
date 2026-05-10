@@ -1,7 +1,13 @@
 name: vn_provinces_api
-description: "Flutter/Dart package để truy vấn dữ liệu địa chỉ tỉnh thành, phường xã Việt Nam qua provinces.open-api.vn."
-version: 1.0.2
+description: "A Flutter/Dart package for querying Vietnam administrative address data
+  (provinces, wards) via provinces.open-api.vn API v2"
+version: 1.0.3
 homepage: https://github.com/ankoi0310/vn_provinces_api
+topics:
+  - vietnam
+  - address
+  - provinces
+  - location
 
 environment:
   sdk: ^3.11.5

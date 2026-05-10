@@ -35,6 +35,7 @@ class Province {
   /// Là thành phố trực thuộc trung ương?
   bool get isMunicipality => divisionType.toLowerCase().contains('thành phố trung ương');
 
+  /// Creates a [Province] from a JSON map returned by the API.
   factory Province.fromJson(Map<String, dynamic> json) {
     final wardJson = json['wards'] as List<dynamic>?;
     return Province(

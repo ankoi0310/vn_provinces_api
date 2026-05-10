@@ -14,6 +14,7 @@ enum DivisionType {
   ward,
   unknown;
 
+  /// Parses a Vietnamese division type string into a [DivisionType] enum value.
   static DivisionType fromString(String value) {
     switch (value.toLowerCase()) {
       case 'tỉnh':
