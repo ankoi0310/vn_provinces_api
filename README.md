@@ -1,39 +1,230 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# vn_provinces_api
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+Flutter/Dart package để truy vấn dữ liệu địa chỉ tỉnh thành, quận huyện, phường xã Việt Nam qua API [provinces.open-api.vn](https://provinces.open-api.vn).
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+Hỗ trợ cả **API v1** (trước sáp nhập tỉnh thành 07/2025) và **API v2** (sau sáp nhập).
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+---
 
-## Features
+## Tính năng
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- ✅ Lấy danh sách tỉnh/thành phố, quận/huyện, phường/xã
+- ✅ Tìm kiếm theo tên (có dấu hoặc không dấu)
+- ✅ Hỗ trợ `depth` để lấy dữ liệu lồng nhau (province → district → ward)
+- ✅ Chuyển đổi phường xã cũ ↔ mới (v2 legacy mapping)
+- ✅ Xử lý lỗi đầy đủ với các exception có nghĩa
+- ✅ Hỗ trợ custom `http.Client` để dễ dàng mock trong test
+- ✅ Null-safe, type-safe
 
-## Getting started
+---
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+## Cài đặt
 
-## Usage
+Thêm vào `pubspec.yaml`:
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  vn_provinces_api: ^1.0.0
 ```
 
-## Additional information
+Sau đó chạy:
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```bash
+flutter pub get
+```
+
+---
+
+## Sử dụng cơ bản
+
+```dart
+import 'package:vn_provinces_api/vn_provinces_api.dart';
+
+void main() async {
+  // Mặc định dùng API v2 (sau sáp nhập 07/2025)
+  final client = VnProvincesClient();
+
+  // Lấy tất cả tỉnh thành
+  final provinces = await client.getProvinces();
+  print(provinces.first.name); // Thành phố Hà Nội
+
+  // Lấy tỉnh kèm danh sách quận/huyện
+  final hanoi = await client.getProvince(1, depth: 2);
+  print(hanoi.districts?.first.name); // Quận Ba Đình
+
+  // Tìm kiếm tỉnh thành
+  final results = await client.searchProvinces('Hồ Chí Minh');
+  print(results.first.name); // Thành phố Hồ Chí Minh
+
+  client.dispose(); // Đóng kết nối khi xong
+}
+```
+
+---
+
+## API Reference
+
+### Khởi tạo
+
+```dart
+// V2 — sau sáp nhập (mặc định)
+final client = VnProvincesClient();
+
+// V1 — trước sáp nhập
+final clientV1 = VnProvincesClient(version: ApiVersion.v1);
+
+// Tùy chỉnh timeout
+final client = VnProvincesClient(timeout: Duration(seconds: 15));
+```
+
+### Tỉnh / Thành phố
+
+| Phương thức | Mô tả |
+|---|---|
+| `getProvinces({depth})` | Lấy danh sách tất cả tỉnh thành |
+| `getProvince(code, {depth})` | Lấy thông tin một tỉnh theo mã |
+| `searchProvinces(q)` | Tìm kiếm tỉnh theo tên |
+
+### Quận / Huyện
+
+| Phương thức | Mô tả |
+|---|---|
+| `getDistrict(code, {depth})` | Lấy thông tin một quận/huyện theo mã |
+| `searchDistricts(q)` | Tìm kiếm quận/huyện theo tên |
+
+### Phường / Xã / Thị trấn
+
+| Phương thức | Mô tả |
+|---|---|
+| `getWard(code)` | Lấy thông tin một phường/xã theo mã |
+| `searchWards(q)` | Tìm kiếm phường/xã theo tên |
+
+### V2 — Ánh xạ phường xã cũ/mới
+
+| Phương thức | Mô tả |
+|---|---|
+| `getWardFromLegacyName(legacyName)` | Tìm phường xã mới từ tên cũ |
+| `getWardToLegacies(wardCode)` | Lấy các phường xã cũ từ mã mới |
+
+### Tham số `depth`
+
+| `depth` | Dữ liệu trả về |
+|---|---|
+| `1` (mặc định) | Chỉ cấp hiện tại |
+| `2` | Kèm cấp con (vd: province + districts) |
+| `3` | Kèm 2 cấp con (province + districts + wards) |
+
+> ⚠️ **Lưu ý:** Hạn chế dùng `depth=3` ở cấp tỉnh để tránh tải nặng cho server công cộng.
+
+---
+
+## Xử lý lỗi
+
+```dart
+try {
+  final province = await client.getProvince(9999);
+} on VnProvincesNotFoundException catch (e) {
+  print('Không tìm thấy: ${e.message}');
+} on VnProvincesNetworkException catch (e) {
+  print('Lỗi mạng: ${e.message}');
+} on VnProvincesHttpException catch (e) {
+  print('Lỗi HTTP ${e.statusCode}: ${e.message}');
+} on VnProvincesException catch (e) {
+  print('Lỗi khác: ${e.message}');
+}
+```
+
+### Danh sách exceptions
+
+| Exception | Khi nào |
+|---|---|
+| `VnProvincesNotFoundException` | Mã không tồn tại (404) |
+| `VnProvincesNetworkException` | Mất mạng, timeout |
+| `VnProvincesHttpException` | Lỗi HTTP khác (4xx, 5xx) |
+| `VnProvincesParseException` | JSON không hợp lệ |
+
+---
+
+## Ví dụ: Dropdown chọn địa chỉ 3 cấp
+
+```dart
+class AddressPicker extends StatefulWidget { ... }
+
+class _AddressPickerState extends State<AddressPicker> {
+  final client = VnProvincesClient();
+  
+  Province? selectedProvince;
+  District? selectedDistrict;
+  Ward? selectedWard;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Dropdown tỉnh/thành
+        FutureBuilder<List<Province>>(
+          future: client.getProvinces(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const CircularProgressIndicator();
+            return DropdownButton<Province>(
+              value: selectedProvince,
+              items: snapshot.data!
+                  .map((p) => DropdownMenuItem(value: p, child: Text(p.name)))
+                  .toList(),
+              onChanged: (p) async {
+                setState(() => selectedProvince = p);
+                final full = await client.getProvince(p!.code, depth: 2);
+                // dùng full.districts cho dropdown tiếp theo
+              },
+            );
+          },
+        ),
+        // ... dropdown quận/huyện, phường/xã tương tự
+      ],
+    );
+  }
+}
+```
+
+---
+
+## Testing
+
+Package hỗ trợ inject `http.Client` để mock dễ dàng:
+
+```dart
+import 'package:mockito/mockito.dart';
+import 'package:http/http.dart' as http;
+
+class MockClient extends Mock implements http.Client {}
+
+final mockClient = MockClient();
+final client = VnProvincesClient(httpClient: mockClient);
+
+when(mockClient.get(any)).thenAnswer(
+  (_) async => http.Response('[{"name":"Hà Nội","code":1,...}]', 200),
+);
+
+final provinces = await client.getProvinces();
+expect(provinces.first.name, 'Hà Nội');
+```
+
+Chạy test:
+
+```bash
+flutter test
+```
+
+---
+
+## Data source
+
+API được cung cấp bởi [provinces.open-api.vn](https://provinces.open-api.vn), dựa trên thư viện [VietnamProvinces](https://pypi.org/project/vietnam-provinces/) của [Nguyễn Hồng Quân](https://quan.hoabinh.vn). Hosting được tài trợ bởi [OMZCloud](https://omzcloud.vn/).
+
+Vui lòng không lạm dụng API công cộng — đặc biệt tham số `depth=3`.
+
+---
+
+## License
+
+MIT
