@@ -2,16 +2,15 @@
 
 Flutter/Dart package để truy vấn dữ liệu địa chỉ tỉnh thành, quận huyện, phường xã Việt Nam qua API [provinces.open-api.vn](https://provinces.open-api.vn).
 
-Hỗ trợ cả **API v1** (trước sáp nhập tỉnh thành 07/2025) và **API v2** (sau sáp nhập).
+Hỗ trợ **API v2** (sau sáp nhập).
 
 ---
 
 ## Tính năng
 
-- ✅ Lấy danh sách tỉnh/thành phố, quận/huyện, phường/xã
+- ✅ Lấy danh sách tỉnh/thành phố, phường/xã
 - ✅ Tìm kiếm theo tên (có dấu hoặc không dấu)
-- ✅ Hỗ trợ `depth` để lấy dữ liệu lồng nhau (province → district → ward)
-- ✅ Chuyển đổi phường xã cũ ↔ mới (v2 legacy mapping)
+- ✅ Hỗ trợ `depth` để lấy dữ liệu lồng nhau (province → ward)
 - ✅ Xử lý lỗi đầy đủ với các exception có nghĩa
 - ✅ Hỗ trợ custom `http.Client` để dễ dàng mock trong test
 - ✅ Null-safe, type-safe
@@ -48,10 +47,6 @@ void main() async {
   final provinces = await client.getProvinces();
   print(provinces.first.name); // Thành phố Hà Nội
 
-  // Lấy tỉnh kèm danh sách quận/huyện
-  final hanoi = await client.getProvince(1, depth: 2);
-  print(hanoi.districts?.first.name); // Quận Ba Đình
-
   // Tìm kiếm tỉnh thành
   final results = await client.searchProvinces('Hồ Chí Minh');
   print(results.first.name); // Thành phố Hồ Chí Minh
@@ -67,11 +62,7 @@ void main() async {
 ### Khởi tạo
 
 ```dart
-// V2 — sau sáp nhập (mặc định)
 final client = VnProvincesClient();
-
-// V1 — trước sáp nhập
-final clientV1 = VnProvincesClient(version: ApiVersion.v1);
 
 // Tùy chỉnh timeout
 final client = VnProvincesClient(timeout: Duration(seconds: 15));
@@ -85,13 +76,6 @@ final client = VnProvincesClient(timeout: Duration(seconds: 15));
 | `getProvince(code, {depth})` | Lấy thông tin một tỉnh theo mã |
 | `searchProvinces(q)` | Tìm kiếm tỉnh theo tên |
 
-### Quận / Huyện
-
-| Phương thức | Mô tả |
-|---|---|
-| `getDistrict(code, {depth})` | Lấy thông tin một quận/huyện theo mã |
-| `searchDistricts(q)` | Tìm kiếm quận/huyện theo tên |
-
 ### Phường / Xã / Thị trấn
 
 | Phương thức | Mô tả |
@@ -99,22 +83,12 @@ final client = VnProvincesClient(timeout: Duration(seconds: 15));
 | `getWard(code)` | Lấy thông tin một phường/xã theo mã |
 | `searchWards(q)` | Tìm kiếm phường/xã theo tên |
 
-### V2 — Ánh xạ phường xã cũ/mới
-
-| Phương thức | Mô tả |
-|---|---|
-| `getWardFromLegacyName(legacyName)` | Tìm phường xã mới từ tên cũ |
-| `getWardToLegacies(wardCode)` | Lấy các phường xã cũ từ mã mới |
-
 ### Tham số `depth`
 
 | `depth` | Dữ liệu trả về |
 |---|---|
 | `1` (mặc định) | Chỉ cấp hiện tại |
-| `2` | Kèm cấp con (vd: province + districts) |
-| `3` | Kèm 2 cấp con (province + districts + wards) |
-
-> ⚠️ **Lưu ý:** Hạn chế dùng `depth=3` ở cấp tỉnh để tránh tải nặng cho server công cộng.
+| `2` | Kèm cấp con (vd: province + wards) |
 
 ---
 
@@ -145,7 +119,7 @@ try {
 
 ---
 
-## Ví dụ: Dropdown chọn địa chỉ 3 cấp
+## Ví dụ: Dropdown chọn địa chỉ 2 cấp
 
 ```dart
 class AddressPicker extends StatefulWidget { ... }
@@ -154,7 +128,6 @@ class _AddressPickerState extends State<AddressPicker> {
   final client = VnProvincesClient();
   
   Province? selectedProvince;
-  District? selectedDistrict;
   Ward? selectedWard;
 
   @override
@@ -174,12 +147,12 @@ class _AddressPickerState extends State<AddressPicker> {
               onChanged: (p) async {
                 setState(() => selectedProvince = p);
                 final full = await client.getProvince(p!.code, depth: 2);
-                // dùng full.districts cho dropdown tiếp theo
+                // dùng full.wards cho dropdown tiếp theo
               },
             );
           },
         ),
-        // ... dropdown quận/huyện, phường/xã tương tự
+        // ... dropdown phường/xã tương tự
       ],
     );
   }
