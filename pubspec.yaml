@@ -1,0 +1,22 @@
+name: vn_provinces_api
+description: "Flutter/Dart package để truy vấn dữ liệu địa chỉ tỉnh thành, phường xã Việt Nam qua provinces.open-api.vn."
+version: 1.0.0
+homepage: https://github.com/ankoi0310/vn_provinces_api
+
+environment:
+  sdk: ^3.11.5
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  mockito: ^5.6.4
+  build_runner: ^2.15.0
+
+flutter:
