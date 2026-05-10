@@ -1,4 +1,4 @@
-## 1.0.2
+## 1.0.3
 
-- Cập nhật README.md phù hợp với phiên bản mới (bỏ district)
-- Thêm ví dụ về cách sử dụng (/example/lib/main.dart)
+- Change package's description with English
+- Add badge of package's version and license in README.md

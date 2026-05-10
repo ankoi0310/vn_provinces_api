@@ -4,6 +4,9 @@ Flutter/Dart package để truy vấn dữ liệu địa chỉ tỉnh thành, qu
 
 Hỗ trợ **API v2** (sau sáp nhập).
 
+[![pub package](https://img.shields.io/pub/v/vn_provinces_api.svg)](https://pub.dev/packages/vn_provinces_api)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 ---
 
 ## Tính năng
@@ -185,10 +188,6 @@ flutter test
 
 API được cung cấp bởi [provinces.open-api.vn](https://provinces.open-api.vn), dựa trên thư viện [VietnamProvinces](https://pypi.org/project/vietnam-provinces/) của [Nguyễn Hồng Quân](https://quan.hoabinh.vn). Hosting được tài trợ bởi [OMZCloud](https://omzcloud.vn/).
 
-Vui lòng không lạm dụng API công cộng — đặc biệt tham số `depth=3`.
+Vui lòng không lạm dụng API công cộng.
 
 ---
-
-## License
-
-MIT
